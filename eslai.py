@@ -1,7 +1,7 @@
-from modules.whisper import hello_world
+from modules.whisper import run_whisper
 
 def main():
-    hello_world()
+    run_whisper()
 
 
 if __name__ == "__main__":
