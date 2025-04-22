@@ -2,7 +2,7 @@ import torch
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 
 
-def run_whisper():
+def run_whisper(file: None):
     # Accounts for Apple silicon chip https://developer.apple.com/metal/pytorch/
     device = "cpu"
     if torch.backends.mps.is_available():
@@ -25,6 +25,8 @@ def run_whisper():
         feature_extractor=processor.feature_extractor,
         torch_dtype=torch_dtype,
         device=device,
-    )
-    result = pipe("example-4-general-en.wav")
-    print(result["text"])
+    )    
+    if file is None:
+        return "No file has been provided"
+    result = pipe(file)
+    return result["text"]
