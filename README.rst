@@ -11,3 +11,7 @@ Author
 Dr. Robert Turnbull
 
 James Uy Thinh Quang
+
+Note
+========================
+Git emojis reference: https://gist.github.com/parmentf/035de27d6ed1dce0b36a
