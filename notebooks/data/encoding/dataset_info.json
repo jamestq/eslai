@@ -1,0 +1,54 @@
+{
+  "builder_name": "csv",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "csv",
+  "dataset_size": 56956,
+  "description": "",
+  "download_checksums": {
+    "/Users/quangu/projects/esl-ai/notebooks/data/train_clean.csv": {
+      "num_bytes": 53364,
+      "checksum": null
+    }
+  },
+  "download_size": 53364,
+  "features": {
+    "path": {
+      "sampling_rate": 16000,
+      "_type": "Audio"
+    },
+    "sentence": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "age": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "gender": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "accents": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 110320,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 56956,
+      "num_examples": 299,
+      "dataset_name": "csv"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}
