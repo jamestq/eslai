@@ -3,11 +3,11 @@ name = "eslai"
 version = "0.1.0"
 description = "A small tool for training pronunciation audio data"
 authors = [
-    {name = "Robert Turnbull",email="robert.turnbull.unimelb.edu.au"}
+    {name = "Robert Turnbull", email = "robert.turnbull@unimelb.edu.au"},
     {name = "James Quang",email = "james.quang@unimelb.edu.au"}
 ]
 license = {text = "MIT"}
-readme = "README.md"
+readme = "README.rst"
 requires-python = ">=3.12"
 dependencies = [
     "pandas (>=2.3.0,<3.0.0)",
