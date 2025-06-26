@@ -10,6 +10,9 @@ from pydub import AudioSegment
 from pydub.silence import detect_nonsilent
 from pathlib import Path
 
+os.environ["WANDB_PROJECT"] = "eslai"
+# Ensure that the WANDB_API_KEY environment variable is set
+
 app = typer.Typer()
 
 class AudioProcessor:
@@ -196,7 +199,7 @@ def train_model(
         id2label=id2label,
         label2id=label2id,
     )
-    training_args = TrainingArguments(
+    training_args = TrainingArguments(        
         output_dir=output_dir,
         eval_strategy="epoch",    
         save_strategy="epoch",
@@ -206,10 +209,12 @@ def train_model(
         per_device_eval_batch_size=32,
         num_train_epochs=10,
         warmup_ratio=0.1,
-        logging_steps=10,
+        logging_steps=1,
         load_best_model_at_end=True,
         metric_for_best_model="accuracy",
         push_to_hub=False,
+        report_to="wandb",
+        run_name=model_name
     )
     trainer = Trainer(
         model=model,
