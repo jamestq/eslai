@@ -1,7 +1,7 @@
 #!/bin/bash
-input_dir=/data/gpfs/projects/punim2612/CommonVoice/dataset
-output_dir=/data/gpfs/projects/punim2612/CommonVoice/accent_recognition/audio_files
-filelist=/data/gpfs/projects/punim2612/CommonVoice/accent_recognition/"$1"
+input_dir=dataset
+output_dir=accent_recognition/audio_files/
+filelist=accent_recognition/"$1"
 
 while IFS= read -r filepath; do
   fullpath="$input_dir/$filepath"
