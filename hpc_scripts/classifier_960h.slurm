@@ -29,5 +29,5 @@ module load FFmpeg/5.0.1;
 source ~/.venv/bin/activate
 pip install -r ~/requirements.txt
 python scripts/auplay.py process-audio accent_recognition/accent_train.tsv accent_recognition/audio_files_treated accent_recognition/encoded
-python scripts/auplay.py feature-extraction accent_recognition/encoded --model-name facebook/wav2vec2-base --output-dir accent_recognition/feature_extracted
-WANDB_API_KEY=5906bb4a857061a6ecf77b4b2b628e83975bf769 python scripts/auplay.py train-model accent_recognition/feature_extracted --model-name facebook/wav2vec2-base --output-dir model-output --train-batch-name wav2vec2-base-encoded
+python scripts/auplay.py feature-extraction accent_recognition/encoded --model-name facebook/wav2vec2-base-960h --output-dir accent_recognition/feature_extracted
+WANDB_API_KEY=5906bb4a857061a6ecf77b4b2b628e83975bf769 python scripts/auplay.py train-model accent_recognition/feature_extracted --model-name facebook/wav2vec2-base-960h --output-dir model-output --train-batch-name wav2vec2-base-960h-encoded

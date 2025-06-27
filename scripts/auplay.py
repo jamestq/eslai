@@ -1,10 +1,8 @@
-import pandas as pd
 import numpy as np
 import typer, evaluate
 from datasets import load_dataset, Audio, ClassLabel, load_from_disk
 from transformers import AutoFeatureExtractor, AutoModelForAudioClassification, TrainingArguments, Trainer
 from pathlib import Path
-from sklearn.metrics import precision_recall_fscore_support
 import glob, os
 from pydub import AudioSegment
 from pydub.silence import detect_nonsilent
@@ -35,6 +33,12 @@ class AudioProcessor:
                 file.write(f"({start}, {end}), ")
             file.write("]")
         print(f"Saved timeline data to {output_path}")
+
+    def is_fully_silent(self, min_silence_len=100, threshold=-30):
+        # Detect non-silent parts
+        non_silent_segments = self.split_audio_by_silence(min_silence_len, threshold)
+        # If the list of non-silent segments is empty, the audio is fully silent
+        return not non_silent_segments
     
     def process_audio(self, min_silence_len=100, threshold=-30, output_folder: Path = None):
         try:
@@ -181,7 +185,8 @@ def feature_extraction(
 def train_model(
     feature_extracted_dataset: str,
     model_name: str = "facebook/wav2vec2-large-xlsr-53",
-    output_dir: str = "model_output"
+    output_dir: str = "model_output",
+    train_batch_name: str= "train_batch"
 ):
     dataset = load_from_disk(feature_extracted_dataset)
     label2id, id2label = get_label_dicts(dataset.features["label"].names)
@@ -208,7 +213,7 @@ def train_model(
         metric_for_best_model="accuracy",
         push_to_hub=False,
         report_to="wandb",
-        run_name=model_name
+        run_name=train_batch_name
     )
     trainer = Trainer(
         model=model,
