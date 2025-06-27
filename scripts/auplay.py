@@ -35,12 +35,6 @@ class AudioProcessor:
                 file.write(f"({start}, {end}), ")
             file.write("]")
         print(f"Saved timeline data to {output_path}")
-
-    def is_fully_silent(self, min_silence_len=100, threshold=-30):
-        # Detect non-silent parts
-        non_silent_segments = self.split_audio_by_silence(min_silence_len, threshold)
-        # If the list of non-silent segments is empty, the audio is fully silent
-        return not non_silent_segments
     
     def process_audio(self, min_silence_len=100, threshold=-30, output_folder: Path = None):
         try:

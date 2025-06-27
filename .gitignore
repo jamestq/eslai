@@ -178,3 +178,5 @@ cython_debug/
 
 # raw
 raw/
+training_results/
+model_output/
