@@ -2,6 +2,8 @@ import numpy as np
 import typer, evaluate
 from datasets import load_dataset, Audio, ClassLabel, load_from_disk
 from transformers import AutoFeatureExtractor, AutoModelForAudioClassification, TrainingArguments, Trainer
+from torch.optim import AdamW
+from torch.optim.lr_scheduler import LambdaLR
 from pathlib import Path
 import glob, os
 from pydub import AudioSegment
@@ -186,7 +188,8 @@ def train_model(
     feature_extracted_dataset: str,
     model_name: str = "facebook/wav2vec2-large-xlsr-53",
     output_dir: str = "model_output",
-    train_batch_name: str= "train_batch"
+    train_batch_name: str= "train_batch",
+    num_train_epochs: int = 20,
 ):
     dataset = load_from_disk(feature_extracted_dataset)
     label2id, id2label = get_label_dicts(dataset.features["label"].names)
@@ -197,31 +200,42 @@ def train_model(
         num_labels=len(id2label),
         id2label=id2label,
         label2id=label2id,
-    )
+    )    
     training_args = TrainingArguments(        
         output_dir=output_dir,
         eval_strategy="epoch",    
         save_strategy="epoch",
-        learning_rate=3e-5,
-        per_device_train_batch_size=32,
+        learning_rate=1e-3,        
         gradient_accumulation_steps=4,
+        per_device_train_batch_size=32,
         per_device_eval_batch_size=32,
-        num_train_epochs=10,
+        num_train_epochs=30,
         warmup_ratio=0.1,
         logging_steps=1,
         load_best_model_at_end=True,
         metric_for_best_model="accuracy",
         push_to_hub=False,
-        report_to="wandb",
-        run_name=train_batch_name
+        report_to="wandb",     
+        lr_scheduler_type="linear",   
+        run_name=train_batch_name,
+        group_by_length=True,
     )
+
+    # def lr_lambda(current_step: int):
+    #     steps_per_epoch = len(dataset_split["train"]) // training_args.per_device_train_batch_size
+    #     epoch = current_step // steps_per_epoch
+    #     return 0.95 ** epoch
+    
+    # optimizer = AdamW(model.parameters(), lr=training_args.learning_rate)
+    # scheduler = LambdaLR(optimizer, lr_lambda)
+
     trainer = Trainer(
         model=model,
         args=training_args,
         train_dataset=dataset_split["train"],
         eval_dataset=dataset_split["test"],
         processing_class=feature_extractor,
-        compute_metrics=compute_metrics,  # Define your compute_metrics function if needed
+        compute_metrics=compute_metrics,  # Define your compute_metrics function if needed        
     )
     trainer.train()
 

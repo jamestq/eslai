@@ -4,8 +4,8 @@
 #SBATCH --job-name=predict
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH -o "run_logs/slum-%N.%j.out" #STDOUT
-#SBATCH -e "run_logs/slum-%N.%j.err" #STDOUT
+#SBATCH -o "run_logs/removesilence-%N.%j.out" #STDOUT
+#SBATCH -e "run_logs/removesilence-%N.%j.err" #STDOUT
 
 # set your minimum acceptable walltime=days-hours:minutes:seconds
 #SBATCH -t 5:00:00
