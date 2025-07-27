@@ -180,3 +180,4 @@ cython_debug/
 raw/
 training_results/
 model_output/
+accent_recognition/
