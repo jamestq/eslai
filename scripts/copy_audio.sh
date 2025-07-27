@@ -4,7 +4,8 @@ output_dir=accent_recognition/audio_files/
 filelist=accent_recognition/"$1"
 
 while IFS= read -r filepath; do
-  fullpath="$input_dir"/"$filepath"
+  fullpath="$input_dir/$filepath"
+  # outpath="$output_dir/$filepath"
   if [[ -f "$fullpath" ]]; then
     cp "$fullpath" "$output_dir"
   else
