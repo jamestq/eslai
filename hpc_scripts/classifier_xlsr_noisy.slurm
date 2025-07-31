@@ -26,7 +26,6 @@ module load GCCcore/11.3.0
 module load Python/3.10.4
 module load FFmpeg/5.0.1;
 source ~/.venv/bin/activate
-source scripts/remove_old_files.sh
 pip install -r ~/requirements.txt
 python scripts/auplay.py process-audio accent_recognition/accent_train_noisy.tsv accent_recognition/audio_files_treated /tmp/punim2612/encoded_"$1"
 python scripts/auplay.py feature-extraction /tmp/punim2612/encoded_"$1" --model-name facebook/wav2vec2-large-xlsr-53 --output-dir /tmp/punim2612/feature_extracted_"$1"
