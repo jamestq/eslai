@@ -210,9 +210,9 @@ def train_model(
         eval_strategy="epoch",    
         save_strategy="epoch",
         learning_rate=learning_rate,        
+        per_device_train_batch_size=32,
         gradient_accumulation_steps=4,
-        per_device_train_batch_size=16,
-        per_device_eval_batch_size=16,
+        per_device_eval_batch_size=32,
         num_train_epochs=num_train_epochs,
         warmup_ratio=0.1,
         logging_steps=1,
@@ -220,13 +220,15 @@ def train_model(
         metric_for_best_model="accuracy",
         push_to_hub=False,
         report_to="wandb",     
-        lr_scheduler_type="linear",   
+        # lr_scheduler_type="linear",   
         run_name=run_name,
         group_by_length=True,               
     )
 
     def lr_lambda(current_step: int):
-        steps_per_epoch = len(dataset_split["train"]) // training_args.per_device_train_batch_size
+        steps_per_epoch = len(dataset_split["train"]) // (training_args.per_device_train_batch_size * training_args.gradient_accumulation_steps)
+        if steps_per_epoch == 0:
+            steps_per_epoch = 1
         epoch = current_step // steps_per_epoch
         return annealing_rate**epoch
     
@@ -239,7 +241,7 @@ def train_model(
         train_dataset=dataset_split["train"],
         eval_dataset=dataset_split["test"],
         processing_class=feature_extractor,
-        compute_metrics=compute_metrics,  #   
+        compute_metrics=compute_metrics,
         optimizers=(optimizer, scheduler),     
     )
     trainer.train()

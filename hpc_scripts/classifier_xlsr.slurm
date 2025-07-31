@@ -2,12 +2,12 @@
 # To give your job a name, replace "MyJob" with an appropriate name
 #SBATCH --job-name=predict
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
-#SBATCH -o "run_logs/classifierxlsr-%N.%j.out" #STDOUT
-#SBATCH -e "run_logs/classifierxlsr-%N.%j.err" #STDOUT
+#SBATCH --cpus-per-task=1
+#SBATCH -o "%j.out" # STDOUT
+#SBATCH -e "%j.err" # STDERR
 
 # set your minimum acceptable walltime=days-hours:minutes:seconds
-#SBATCH -t 2:00:00
+#SBATCH -t 24:00:00
 
 #SBATCH --mem-per-cpu=12G
 
