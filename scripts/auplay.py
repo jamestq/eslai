@@ -193,7 +193,10 @@ def train_model(
     run_name: str= "train_batch",
     num_train_epochs: int = 30,
     learning_rate: float = 1e-3,    
-    annealing_rate: float = 0.95
+    annealing_rate: float = 0.95,
+    train_batch_size: int = 32,
+    validation_batch_size: int = 32,
+    gradient_accumulation_steps: int = 4,
 ):
     dataset = load_from_disk(feature_extracted_dataset)
     label2id, id2label = get_label_dicts(dataset.features["label"].names)
@@ -209,9 +212,9 @@ def train_model(
         output_dir=output_dir,
         eval_strategy="epoch",    
         save_strategy="epoch",
-        learning_rate=learning_rate,        
-        per_device_train_batch_size=128,        
-        per_device_eval_batch_size=128,
+        learning_rate=learning_rate,
+        per_device_train_batch_size=train_batch_size,
+        per_device_eval_batch_size=validation_batch_size,
         num_train_epochs=num_train_epochs,
         warmup_ratio=0.1,
         logging_steps=1,
