@@ -1,7 +1,7 @@
 import numpy as np
 import typer, evaluate
 from datasets import load_dataset, Audio, ClassLabel, load_from_disk
-from transformers import AutoFeatureExtractor, AutoModelForAudioClassification, TrainingArguments, Trainer
+from transformers import AutoFeatureExtractor, AutoModelForAudioClassification, TrainingArguments, Trainer, EarlyStoppingCallback
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import LambdaLR
 from pathlib import Path
@@ -151,6 +151,8 @@ def process_audio(
     """
     Process audio files from a CSV file and save them in a format compatible with Hugging Face datasets.
     """
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
     # Load the dataset from the CSV file
     dataset = load_dataset("csv", sep="\t", data_files=input_csv, split="train")
     dataset = dataset.map(lambda row: {"path": f"{audio_file_location}/{row['path']}"})   
@@ -188,8 +190,10 @@ def train_model(
     feature_extracted_dataset: str,
     model_name: str = "facebook/wav2vec2-large-xlsr-53",
     output_dir: str = "model_output",
-    train_batch_name: str= "train_batch",
-    num_train_epochs: int = 20,
+    run_name: str= "train_batch",
+    num_train_epochs: int = 30,
+    learning_rate: float = 1e-3,    
+    annealing_rate: float = 0.95
 ):
     dataset = load_from_disk(feature_extracted_dataset)
     label2id, id2label = get_label_dicts(dataset.features["label"].names)
@@ -205,11 +209,11 @@ def train_model(
         output_dir=output_dir,
         eval_strategy="epoch",    
         save_strategy="epoch",
-        learning_rate=1e-3,        
+        learning_rate=learning_rate,        
         gradient_accumulation_steps=4,
-        per_device_train_batch_size=32,
-        per_device_eval_batch_size=32,
-        num_train_epochs=30,
+        per_device_train_batch_size=16,
+        per_device_eval_batch_size=16,
+        num_train_epochs=num_train_epochs,
         warmup_ratio=0.1,
         logging_steps=1,
         load_best_model_at_end=True,
@@ -217,17 +221,17 @@ def train_model(
         push_to_hub=False,
         report_to="wandb",     
         lr_scheduler_type="linear",   
-        run_name=train_batch_name,
-        group_by_length=True,
+        run_name=run_name,
+        group_by_length=True,               
     )
 
-    # def lr_lambda(current_step: int):
-    #     steps_per_epoch = len(dataset_split["train"]) // training_args.per_device_train_batch_size
-    #     epoch = current_step // steps_per_epoch
-    #     return 0.95 ** epoch
+    def lr_lambda(current_step: int):
+        steps_per_epoch = len(dataset_split["train"]) // training_args.per_device_train_batch_size
+        epoch = current_step // steps_per_epoch
+        return annealing_rate**epoch
     
-    # optimizer = AdamW(model.parameters(), lr=training_args.learning_rate)
-    # scheduler = LambdaLR(optimizer, lr_lambda)
+    optimizer = AdamW(model.parameters(), lr=training_args.learning_rate)
+    scheduler = LambdaLR(optimizer, lr_lambda)
 
     trainer = Trainer(
         model=model,
@@ -235,7 +239,8 @@ def train_model(
         train_dataset=dataset_split["train"],
         eval_dataset=dataset_split["test"],
         processing_class=feature_extractor,
-        compute_metrics=compute_metrics,  # Define your compute_metrics function if needed        
+        compute_metrics=compute_metrics,  #   
+        optimizers=(optimizer, scheduler),     
     )
     trainer.train()
 
