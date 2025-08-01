@@ -197,6 +197,7 @@ def train_model(
     train_batch_size: int = 32,
     validation_batch_size: int = 32,
     gradient_accumulation_steps: int = 4,
+    custom_scheduler: bool = False,
 ):
     dataset = load_from_disk(feature_extracted_dataset)
     label2id, id2label = get_label_dicts(dataset.features["label"].names)
@@ -225,27 +226,38 @@ def train_model(
         lr_scheduler_type="linear",   
         run_name=run_name,
         group_by_length=True,               
-    )
-
+    )    
+    
     def lr_lambda(current_step: int):
         steps_per_epoch = len(dataset_split["train"]) // (training_args.per_device_train_batch_size * training_args.gradient_accumulation_steps)
         if steps_per_epoch == 0:
             steps_per_epoch = 1
         epoch = current_step // steps_per_epoch
         return annealing_rate**epoch
-    
+
     optimizer = AdamW(model.parameters(), lr=training_args.learning_rate)
     scheduler = LambdaLR(optimizer, lr_lambda)
 
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        train_dataset=dataset_split["train"],
-        eval_dataset=dataset_split["test"],
-        processing_class=feature_extractor,
-        compute_metrics=compute_metrics,
-        optimizers=(optimizer, scheduler),     
-    )
+    if custom_scheduler:
+        trainer = Trainer(
+            model=model,
+            args=training_args,
+            train_dataset=dataset_split["train"],
+            eval_dataset=dataset_split["test"],
+            processing_class=feature_extractor,
+            compute_metrics=compute_metrics,
+            optimizers=(optimizer, scheduler),     
+        )        
+    else:
+        trainer = Trainer(
+            model=model,
+            args=training_args,
+            train_dataset=dataset_split["train"],
+            eval_dataset=dataset_split["test"],
+            processing_class=feature_extractor,
+            compute_metrics=compute_metrics,            
+        )
+    
     trainer.train()
 
 
